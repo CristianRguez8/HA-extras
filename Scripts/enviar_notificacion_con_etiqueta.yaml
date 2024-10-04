@@ -1,0 +1,49 @@
+alias: Enviar notificación con etiqueta
+sequence:
+  - parallel:
+      - action: notify.mobile_app
+        metadata: {}
+        data:
+          title: "{{titulo}}"
+          message: "{{mensaje}}"
+          data:
+            channel: "{{etiqueta}}"
+            color: |-
+              {% if etiqueta == 'Alarmas' %}
+                {{ 'red' }}
+              {% elif etiqueta == 'Info' %}
+                {{ '#9933ff' }}
+              {% elif etiqueta == 'Verificacion' %}
+                {{ '#FFC0CB' }}
+              {% else %}
+                {{ '#008800' }}
+              {% endif %}
+      - action: notify.telegram
+        metadata: {}
+        data:
+          title: "*{{titulo}}*"
+          message: "{{mensaje}}"
+          data:
+            message_tag: "{{etiqueta}}"
+description: "Envia una notificación vía app y telegram usando una etiqueta. En telegram se usa para los registros y en móvil para el canal de notificaciones (puedes definir distintos sonidos y formas de notificar). Es necesario motificar las action a la entidad concreta que hace el envío"
+fields:
+  mensaje:
+    selector:
+      text: null
+    name: Mensaje
+    required: true
+    default: Creo que no se ha especificado ningún mensaje
+    description: El mensaje que se enviará
+  titulo:
+    selector:
+      text: null
+    name: Titulo
+    description: El título del mensaje que se enviará
+    required: true
+    default: Parece que no hay ningún título
+  etiqueta:
+    selector:
+      text: null
+    name: Etiqueta
+    description: Añade una etiqueta al mensaje
+    default: default

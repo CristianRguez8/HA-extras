@@ -1,0 +1,27 @@
+blueprint:
+    name: Puerta abierta por la noche
+    description: Comprobar que no te dejas una puerta abierta por la noche. Para usar es necesario cambiar la palabra "sensor_puerta" por una etiqueta que sólo tengan los sensores de las puertas
+    domain: automation
+    author: cristianrguez8
+
+alias: Puerta abierta por la noche
+description: Comprobar que no te dejas una puerta abierta por la noche
+triggers:
+  - trigger: time
+    at: "21:00:00"
+variables:
+    puertasAbiertas: "{{label_entities('sensor_puerta') | select('is_state', 'on') | list | map('state_attr', 'friendly_name') | list }}"
+    totalAbiertas: "{{puertasAbiertas | length }}"
+conditions: "{{ totalAbiertas > 0 }}"
+actions:
+    - service: script.enviar_notificacion_con_etiqueta
+      data:
+        titulo: >
+            {%- import 'mensajes.jinja' as mensajes -%}
+            {{ mensajes.mensajes_puertas_noche('titulo') }}
+        mensaje: >
+            {%- import 'mensajes.jinja' as mensajes -%}
+            {{ mensajes.mensajes_puertas_noche('mensaje', puertasAbiertas, totalAbiertas) }}
+        etiqueta: "Verificacion"
+mode: single
+

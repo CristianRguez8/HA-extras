@@ -1,0 +1,28 @@
+blueprint:
+    name: Se ha detectado movimiento
+    description: Avisar de que se acaba de detectar movimiento. Para usar es necesario cambiar la variable "sensores" a la lista de sensores de las puertas y "alarmado" a un ayudante booleano
+    domain: automation
+    author: cristianrguez8
+
+alias: Se ha detectado movimiento
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+        {{sensores}}
+    not_to: 'off'
+conditions:
+  - condition: state
+    entity_id: {{alarmado}}
+    state: "on"
+actions:
+    - service: script.enviar_notificacion_con_etiqueta
+      data:
+        titulo: >
+            {%- import 'mensajes.jinja' as mensajes -%}
+            {{ mensajes.mensajes_movimiento('titulo', trigger.to_state.state, trigger.to_state.name) }}
+        mensaje: >
+            {%- import 'mensajes.jinja' as mensajes -%}
+            {{ mensajes.mensajes_movimiento('mensaje', trigger.to_state.state, trigger.to_state.name) }}
+        etiqueta: "Alarmas"
+mode: single

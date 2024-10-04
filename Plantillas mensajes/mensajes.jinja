@@ -1,0 +1,77 @@
+{# Estos mensajes se pueden usar para la automatización de cambio de estado de la puerta #}
+{%- macro mensajes_puertas(tipo, mensaje, puerta='puerta desconocida') -%}
+{%- set titulos = {
+  'on': 'Ojo cuidao!',
+  'off': 'Uf, menos mal'
+} -%}
+{%- set mensajes = {
+  'on': 'Se ha abierto',
+  'off': 'Ya se ha cerrado'
+} -%}
+{# On = se ha abierto, Off se ha cerrado #}
+{%- if tipo == 'titulo' -%}
+{# Si es otra situación va aquí debajo: #}
+{{ titulos.get(mensaje, 'Bueno carallo!') }}
+{%- else -%}
+{{ mensajes.get(mensaje, 'Ya se ha muerto') ~ ' ' ~ puerta }}
+{%- endif -%}
+{%- endmacro -%}
+
+{# Estos mensajes se pueden usar para la automatización de cambio de estado de sensores de movimiento #}
+{%- macro mensajes_movimiento(tipo, mensaje, sensor='desconocido') -%}
+{%- set titulos = {
+  'on': 'Intrusos!',
+  'off': 'Parece que se han marchado'
+} -%}
+{%- set mensajes = {
+  'on': 'ha detectado movimiento',
+  'off': 'ha pasado a despejado'
+} -%}
+{# On = hay alguien, Off no hay nadie #}
+{%- if tipo == 'titulo' -%}
+{# Si es otra situación va aquí debajo: #}
+{{ titulos.get(mensaje, 'Bueno carallo!') }}
+{%- else -%}
+{{ mensajes.get('intro', 'El sensor') ~ ' ' ~ sensor ~ ' ' ~  mensajes.get(mensaje, 'se ha muerto') }}
+{%- endif -%}
+{%- endmacro -%}
+
+{# Estos mensajes se pueden usar para la automatización que valida cada hora si hay puertas abiertas #}
+{%- macro mensajes_val_puertas(tipo, puertas=None, cantidad = 0) -%}
+{%- import 'formateadores.jinja' as formateadores -%}
+{# El título #}
+{%- if tipo == 'titulo' -%}
+Ten cuidado!
+{%- else -%}
+{# Y el mensaje que incluye la cantidad de puertas y el formateador que pinta los plurales #}
+Hay {{ cantidad }} puerta{{ formateadores.pluralS(cantidad) }} que permanece{{ formateadores.pluralN(cantidad) }} abierta{{ formateadores.pluralS(cantidad) }}:
+{%-if puertas is not none %}
+{# Y aquí se hace el bucle de las puertas abiertas #}
+{%- for puerta in puertas %}
+  {{ puerta }}
+{%- endfor %}
+{%- else %}
+  A saber
+{%- endif %}
+{%- endif -%}
+{%- endmacro -%}
+
+{# Estos mensajes se pueden usar para la automatización que comprueba a la noche si se queda alguna puerta abierta #}
+{%- macro mensajes_puertas_noche(tipo, puertas=None, cantidad = 0) -%}
+{%- import 'formateadores.jinja' as formateadores -%}
+{%- if tipo == 'titulo' -%}
+{# El título #}
+Cuidado!
+{%- else -%}
+{# Y el mensaje que incluye la cantidad de puertas y el formateador que pinta los plurales #}
+Se hace de noche y te has dejado {{ cantidad }} puerta{{ formateadores.pluralS(cantidad) }} abierta{{ formateadores.pluralS(cantidad) }}:
+{%-if puertas is not none %}
+{# Y aquí se hace el bucle de las puertas abiertas #}
+{%- for puerta in puertas %}
+  {{ puerta }}
+{%- endfor %}
+{%- else %}
+  A saber
+{%- endif %}
+{%- endif -%}
+{%- endmacro -%}

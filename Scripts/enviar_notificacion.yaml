@@ -1,0 +1,29 @@
+alias: Enviar notificación
+sequence:
+  - parallel:
+      - action: notify.mobile_app
+        metadata: {}
+        data:
+          title: "{{titulo}}"
+          message: "{{mensaje}}"
+      - action: notify.telegram
+        metadata: {}
+        data:
+          title: "*{{titulo}}*"
+          message: "{{mensaje}}"
+description: "Envia una notificación vía app y telegram. Es necesario motificar las action a la entidad concreta que hace el envío"
+fields:
+  mensaje:
+    selector:
+      text: null
+    name: Mensaje
+    required: true
+    default: Creo que no se ha especificado ningún mensaje
+    description: El mensaje que se enviará
+  titulo:
+    selector:
+      text: null
+    name: Titulo
+    description: El título del mensaje que se enviará
+    required: true
+    default: Parece que no hay ningún título

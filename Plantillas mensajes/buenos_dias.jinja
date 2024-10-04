@@ -1,0 +1,88 @@
+{%- import 'mensajes_buenos_dias.jinja' as mensajes -%}
+
+{# Esta función te saludará indicando si ya amaneció o falta para ello #}
+{%- macro saludo() %}
+{{ mensajes.buenosDias() }}
+{%- if states.sun.sun.state == "above_horizon" -%}
+{{ mensajes.yaAmanecio() }}
+{%- else %}
+{%- set proximoAmanecer = as_timestamp(states.sensor.sun_next_rising.state) %}
+{%- set segundosHastaAmanecer = (proximoAmanecer-hoy) | round() %}
+{{ mensajes.tiempoRestanteAmanecer(segundosHastaAmanecer) }}
+{%- endif %}
+{%- endmacro %}
+
+{# Esta función utiliza 2 calendarios (festivos de tu CCAA y uno en el que anotes tus vacaciones) y el sensor de dia laboral #}
+{%- macro resumenDia() %}
+{%- set hoy = as_timestamp(now()) %}
+{{ mensajes.queDiaEs(hoy) }}
+{%- set esLaboral = states.binary_sensor.dia_laboral.state == 'on' -%}
+{# Define aquí el calendario de festivos de tu CCAA (puedes añadirlo en calendarios) #}
+{%- set esFestivo = states.calendar.espana_ga.state == 'on' -%}
+{%- set motivoFestivo = state_attr('calendar.espana_ga', 'message') -%}
+{# Y aquí el calendario en el que anotas tus vacaciones #}
+{%- set hayVacaciones = states.calendar.mis_vacaciones.state == 'on' -%}
+{%- if hayVacaciones -%}
+{{ mensajes.hoyHayVacaciones() }}
+{%- else -%}
+{%- if esLaboral -%}
+{%- if esFestivo -%}
+{{ mensajes.hoyEsFestivo(motivoFestivo) }}
+{%- else -%}
+{{ mensajes.hayQueTrabajar() }}
+{%- endif -%}
+{%- else -%}
+{{ mensajes.hoyEsNoLaboral() }}
+{%- if esFestivo -%}
+{{ mensajes.ademasEsFestivo(motivoFestivo) }}
+{%- endif -%}
+{%- endif -%}
+{%- if esFestivo != true -%}
+{%- set inicioFestivo = as_timestamp(state_attr('calendar.espana_ga','start_time')) %}
+{%- set diferenciaTiempo = (((inicioFestivo - hoy) / 86400)+1) | round() %}
+{{ mensajes.proximoFestivo(motivoFestivo, inicioFestivo, diferenciaTiempo) }}
+{%- endif %}
+{%- set inicioVacaciones = as_timestamp(state_attr('calendar.mis_vacaciones','start_time')) %}
+{%- set diferenciaTVacas = (((inicioVacaciones - hoy) / 86400)+1) | round() %}
+{{ mensajes.proximasVacaciones(inicioVacaciones, diferenciaTVacas) }}
+{%- endif %}
+{%- endmacro %}
+
+{# Esta función utiliza la integración del tiempo de aemet muestra un resumen del clima #}
+{%- macro resumenClima() %}
+{{ mensajes.separador() }}
+{%- set condicionActual = states.sensor.aemet_condition.state -%}
+{%- if condicionaActual != 'unavailable' -%}
+{%- set prediccionCondicion = states.sensor.aemet_daily_forecast_condition.state -%}
+{%- set prediccionProbLluvia = states.sensor.aemet_daily_forecast_precipitation_probability.state | int -%}
+{%- set prediccionTemperatura = states.sensor.aemet_daily_forecast_temperature.state | int -%}
+{%- set prediccionTempMin = states.sensor.aemet_daily_forecast_temperature_low.state | int -%}
+{%- set prediccionDireccionViento = states.sensor.aemet_daily_forecast_wind_bearing.state | int -%}
+{%- set prediccionVelocidadViento = states.sensor.aemet_daily_forecast_wind_speed.state %}
+{{ mensajes.elTiempoAhora(condicionActual) }}
+{{ mensajes.elTiempoPrediccion(prediccionCondicion) }}
+{{ mensajes.elTiempoPredProbLluvia(prediccionProbLluvia) }}
+{{ mensajes.elTiempoPredTemperaturas(prediccionTempMin, prediccionTemperatura) }}
+{{ mensajes.elTiempoPredVientos(prediccionDireccionViento, prediccionVelocidadViento) }}
+{%- else -%}
+{{ mensajes.elTiempoNoDisponible() }}
+{%- endif -%}
+{%- endmacro %}
+
+{# Esta función hace un resumen de los estados de sensores (por ejemplo temperatura interior y exterior) #}
+{%- macro resumenSensores() %}
+{{ mensajes.separador() }}
+{# Define aquí los sensores que quieres utilizar para el resumen #}
+{%- set tempInterior = states.sensor.temperatura_interior.state %}
+{%- set tempExterior = states.sensor.temperatura_exterior.state %}
+{%- set humedadInterior = states.sensor.humedad_interior.state %}
+{%- set humExterior = states.sensor.humedad_exterior.state %}
+{{ mensajes.resumenTemperaturas(tempInterior,tempExterior) }}
+{{ mensajes.resumenHumedades(humedadInterior,humExterior) }}
+{%- endmacro %}
+
+{# Esta función utiliza la integración de alertas de desastres GDACS y muestra si hay alguna #}
+{%- macro resumenAlertas() %}
+{%- set alertasDesastres = states.sensor.alertas_desastres.state | int %}
+{{ mensajes.alertaDesastres(alertasDesastres) }}
+{%- endmacro %}

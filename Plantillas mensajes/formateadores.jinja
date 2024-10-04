@@ -1,0 +1,51 @@
+{# Formatea un timestamp como dd/mm/YYYY #}
+{%- macro formatearFecha(timestamp) -%}
+{{ timestamp | timestamp_custom('%d/%m/%Y') }}
+{%- endmacro -%}
+
+{# Pásale una cantidad y te devolverá una 's' si es mayor que 1, útil para hacer plurales (por ejemplo gato{{pluralS(cantidadGatos)}} pintaría 'gatos' si es mayor que 1) #}
+{%- macro pluralS(i) -%}
+{%- if i != 1 %}s{% endif %}
+{%- endmacro -%}
+
+{# Pásale una cantidad y te devolverá una 'n' si es mayor que 1, útil para hacer plurales (por ejemplo queda{{pluralN(cantidad)}} pintaría 'quedan' si es mayor que 1) #}
+{%- macro pluralN(i) -%}
+{%- if i != 1 %}n{% endif %}
+{%- endmacro -%}
+
+{# Transforma el state de una entidad tipo clima a un texto que poder encadenar con 'Ahora mismo' #}
+{%- macro traducirClimaActual(clima) -%}
+{%- set climasActuales = {
+  'cloudy': 'está nublado',
+  'fog': 'hay niebla',
+  'rainy': 'está lloviendo',
+  'partlycloudy': 'hay nubes y claros',
+  'clearnight': 'está la noche clara',
+  'sunny': 'está el cielo despejado'
+} -%}
+{{ climasActuales.get(clima, 'no está claro el clima') }}
+{%- endmacro -%}
+
+{# Transforma el state de una entidad tipo clima a un texto que poder encadenar con 'Hoy se prevee' #}
+{%- macro traducirClimaPrediccion(clima) -%}
+{%- set prediccionesClima = {
+  'cloudy': ' que esté el cielo nublado',
+  'fog': ' que haya bancos de niebla',
+  'rainy': 'n lluvias',
+  'partlycloudy': ' que haya nubes y claros',
+  'clearnight': ' una noche clara',
+  'sunny': ' un día soleado'
+} -%}
+{{ prediccionesClima.get(clima, 'algo que no está claro') }}
+{%- endmacro -%}
+
+{# Convierte la dirección del viento en grados al punto cardinal desde el que se origina el viento #}
+{%- macro traducirDireccionViento(direccion) -%}
+{%- set direccionesViento = {
+  0: 'norte',
+  90: 'este',
+  180: 'sur',
+  270: 'oeste'
+} -%}
+{{ direccionesViento.get(direccion, direccion) }}
+{%- endmacro -%}

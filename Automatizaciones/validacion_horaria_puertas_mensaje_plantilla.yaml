@@ -1,0 +1,34 @@
+blueprint:
+  name: Validación horaria puertas
+  description: Validación horaria de que hay una o varias puertas abiertas dependiente de la alarma. Para usar es necesario cambiar la palabra "sensor_puerta" por una etiqueta que sólo tengan los sensores de las puertas y "alarmado" a un ayudante booleano
+  domain: automation
+  author: cristianrguez8
+
+alias: Validación horaria puertas
+description: Validación horaria de que hay una o varias puertas abiertas dependiente de la alarma
+triggers:
+  - trigger: time_pattern
+    hours: "*"
+variables:
+  puertasAbiertas: "{{label_entities('sensor_puerta') | select('is_state', 'on') | list | map('state_attr', 'friendly_name') | list }}"
+  totalAbiertas: "{{puertasAbiertas | length }}"
+conditions:
+  - and:
+    - "{{ totalAbiertas > 0 }}"
+    - condition: state
+    entity_id: {{alarmado}}
+      state: "on"
+    - condition: time
+      before: "23:05:00"
+      after: "07:50:00"
+actions:
+  - service: script.enviar_notificacion_con_etiqueta
+    data:
+      titulo: >
+            {%- import 'mensajes.jinja' as mensajes -%}
+            {{ mensajes.mensajes_val_puertas('titulo') }}
+      mensaje: >
+            {%- import 'mensajes.jinja' as mensajes -%}
+            {{ mensajes.mensajes_val_puertas('mensaje', puertasAbiertas, totalAbiertas) }}
+      etiqueta: "Verificacion"
+mode: single

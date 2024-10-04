@@ -1,0 +1,28 @@
+blueprint:
+    name: Cambio de estado de puerta
+    description: Avisar de que una puerta cambió de estado. Para usar es necesario cambiar la variable "sensores" a la lista de sensores de las puertas y "alarmado" a un ayudante booleano
+    domain: automation
+    author: cristianrguez8
+
+alias: Cambio de estado de puerta
+description: Avisar de que ya una puerta cambió de estado
+triggers:
+  - trigger: state
+    entity_id:
+        {{sensores}}
+    to:
+conditions:
+  - condition: state
+    entity_id: {{alarmado}}
+    state: "on"
+actions:
+    - service: script.enviar_notificacion_con_etiqueta
+      data:
+        titulo: >
+            {%- import 'mensajes.jinja' as mensajes -%}
+            {{ mensajes.mensajes_puertas('titulo', trigger.to_state.state, trigger.to_state.name) }}
+        mensaje: >
+            {%- import 'mensajes.jinja' as mensajes -%}
+            {{ mensajes.mensajes_puertas('mensaje', trigger.to_state.state, trigger.to_state.name) }}
+        etiqueta: "Alarmas"
+mode: single

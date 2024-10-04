@@ -1,0 +1,125 @@
+{# Un simple saludo de buenos días, perfecto para comenzar #}
+{%- macro buenosDias() %}
+Buenos días
+{%- endmacro %}
+
+{# Cuando ya amaneció te anima a levantarte #}
+{%- macro yaAmanecio() %}
+Venga que ya amaneció
+{%- endmacro %}
+
+{# Indica cuánto falta para que amanezca #}
+{%- macro tiempoRestanteAmanecer(segundos) %}
+{%- import 'formateadores.jinja' as formateadores -%}
+{%- if segundos < 60 -%}
+Queda{{ formateadores.pluralN(segundos) }} {{ segundos }} segundo{{ formateadores.pluralS(segundos) }} para que amanezca
+{%- elif segundos < 3600 -%}
+Queda{{ formateadores.pluralN((segundos/60) | round()) }} {{ (segundos/60) | round() }} minuto{{ formateadores.pluralS((segundos/60) | round()) }} para que amanezca
+{%- else -%}
+Queda{{ formateadores.pluralN((segundos/3600) | round()) }} {{ (segundos/3600) | round() }} hora{{ formateadores.pluralS((segundos/3600) | round()) }} para que amanezca 
+{%- endif %}
+{%- endmacro %}
+
+{# Muestra la fecha de hoy #}
+{%- macro queDiaEs(hoy) %}
+{%- import 'formateadores.jinja' as formateadores -%}
+Hoy es {{ formateadores.formatearFecha(hoy) }}
+{%- endmacro %}
+
+{# Te dice que hay vacaciones hoy #}
+{%- macro hoyHayVacaciones() %}
+Hoy hay vacaciones, ya era hora
+{%- endmacro %}
+
+{# Te dice que había que aunque es laboral es festivo (y el motivo del festivo) #}
+{%- macro hoyEsFestivo(motivo) %}
+Hoy había que trabajar pero es festivo por {{ motivo }}, yey!
+{%- endmacro %}
+
+{# Es un día laboral y toca trabajar #}
+{%- macro hayQueTrabajar() %}
+Por desgracia hay que trabajar hoy
+{%- endmacro %}
+
+{# No es laboral, así que no se trabaja #}
+{%- macro hoyEsNoLaboral() %}
+Hoy no se trabaja, es un gran día
+{%- endmacro %}
+
+{# Para agregar cuando es festivo (con el motivo del festivo) #}
+{%- macro ademasEsFestivo(motivo) %}
+Y además es festivo por {{ motivo }} y todo
+{%- endmacro %}
+
+{# Cuánto queda para el próximo festivo (con el motivo del festivo) #}
+{%- macro proximoFestivo(motivo, inicio, diferencia) %}
+{%- import 'formateadores.jinja' as formateadores -%}
+El próximo festivo es {{ motivo }} el día {{ formateadores.formatearFecha(inicio) }}
+Falta{{ formateadores.pluralN(diferencia) }} {{ diferencia }} día{{ formateadores.pluralS(diferencia) }}
+{%- endmacro %}
+
+{# Cuánto queda para el próximo día de vacaciones #}
+{%- macro proximasVacaciones(inicio, diferencia) %}
+{%- import 'formateadores.jinja' as formateadores -%}
+Las vacaciones empiezan el día {{ formateadores.formatearFecha(inicio) }}
+Ya sólo falta{{ formateadores.pluralN(diferencia) }} {{ diferencia }} día{{ formateadores.pluralS(diferencia) }}, ánimo
+{%- endmacro %}
+
+{# El tiempo ahora mismo #}
+{%- macro elTiempoAhora(clima) %}
+{%- import 'formateadores.jinja' as formateadores -%}
+Ahora mismo {{ formateadores.traducirClimaActual(clima) }}
+{%- endmacro %}
+
+{# La previsión del tiempo #}
+{%- macro elTiempoPrediccion(clima) %}
+{%- import 'formateadores.jinja' as formateadores -%}
+Hoy se prevee{{ formateadores.traducirClimaPrediccion(clima) }}
+{%- endmacro %}
+
+{# La previsión de la probabilidad de lluvias #}
+{%- macro elTiempoPredProbLluvia(probabilidad) %}
+{%- if probabilidad > 0 -%}
+La probabilidad de lluvias hoy es un {{ probabilidad }}%
+{%- endif -%}
+{%- endmacro -%}
+
+{# La previsión de las temperaturas #}
+{%- macro elTiempoPredTemperaturas(tMin, temperatura) -%}
+Con temperaturas de {{ temperatura }}º y mínimas de {{ tMin }}º
+{%- endmacro %}
+
+{# La previsión de los vientos #}
+{%- macro elTiempoPredVientos(direccion, velocidad) %}
+{%- import 'formateadores.jinja' as formateadores -%}
+{%- if direccion != 'unknown' -%}
+Con vientos del {{ formateadores.traducirDireccionViento(direccion) }} y velocidades de {{ velocidad }} km/h
+{%- endif -%}
+{%- endmacro %}
+
+{# Para cuando no funciona la integración del clima #}
+{%- macro elTiempoNoDisponible() %}
+La información climatológica no se encuentra disponible
+{%- endmacro %}
+
+{# La temperatura interior y exterior (cambia las variables o añade más si quieres más información, por ejemplo, arriba, en el bajo, en la habitación...) #}
+{%- macro resumenTemperaturas(interior,exterior) -%}
+Ahora mismo hace {{interior}}º dentro y {{exterior}}º fuera.
+{%- endmacro -%}
+
+{# La humedad relativa interior y exterior (cambia las variables o añade más si quieres más información, por ejemplo, arriba, en el bajo, en la habitación...) #}
+{%- macro resumenHumedades(interior,exterior) -%}
+La humedad relativa está en un {{interior}}% dentro y {{exterior}}% fuera.
+{%- endmacro -%}
+
+{# Te avisa de qué hay alertas de desastres (sólo si hay) #}
+{%- macro alertaDesastres(cantidad) %}
+{%- if cantidad > 0 -%}
+Alerta! Se han detectado {{alertasDesastres}} alertas de desastres
+{%- endif -%}
+{%- endmacro -%}
+
+{# Un separador muy útil cuando tienes mucho texto #}
+{%- macro separador() %}
+----------------------------------------------------------------
+{%- endmacro -%}

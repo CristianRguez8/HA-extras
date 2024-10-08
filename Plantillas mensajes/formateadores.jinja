@@ -3,6 +3,24 @@
 {{ timestamp | timestamp_custom('%d/%m/%Y') }}
 {%- endmacro -%}
 
+{# Formatea un día a su nombre (compensa el +1 que añade timestamp_custom('%w')) #}
+{%- macro formatearDiaSemana(dia) -%}
+{%- set dia = dia -1 %}
+{%- if dia < 0 %}
+{%- set dia = dia + 7 %}
+{%- endif %}
+{%- set diasSemana = {
+  0: 'Lunes',
+  1: 'Martes',
+  2: 'Miércoles',
+  3: 'Jueves',
+  4: 'Viernes',
+  5: 'Sábado',
+  6: 'Domingo'
+} %}
+{{ diasSemana.get(dia) }}
+{%- endmacro -%}
+
 {# Pásale una cantidad y te devolverá una 's' si es mayor que 1, útil para hacer plurales (por ejemplo gato{{pluralS(cantidadGatos)}} pintaría 'gatos' si es mayor que 1) #}
 {%- macro pluralS(i) -%}
 {%- if i != 1 %}s{% endif %}
@@ -16,12 +34,13 @@
 {# Transforma el state de una entidad tipo clima a un texto que poder encadenar con 'Ahora mismo' #}
 {%- macro traducirClimaActual(clima) -%}
 {%- set climasActuales = {
-  'cloudy': 'está nublado',
-  'fog': 'hay niebla',
-  'rainy': 'está lloviendo',
-  'partlycloudy': 'hay nubes y claros',
-  'clearnight': 'está la noche clara',
-  'sunny': 'está el cielo despejado'
+  'cloudy': 'está nublado ☁',
+  'fog': 'hay niebla 🌫',
+  'rainy': 'está lloviendo 🌧',
+  'partlycloudy': 'hay nubes y claros 🌥',
+  'clearnight': 'está la noche clara 🌙',
+  'sunny': 'está el cielo despejado ☀',
+  'lightning': ' hay tormentas eléctricas 🌩'
 } -%}
 {{ climasActuales.get(clima, 'no está claro el clima') }}
 {%- endmacro -%}
@@ -29,23 +48,28 @@
 {# Transforma el state de una entidad tipo clima a un texto que poder encadenar con 'Hoy se prevee' #}
 {%- macro traducirClimaPrediccion(clima) -%}
 {%- set prediccionesClima = {
-  'cloudy': ' que esté el cielo nublado',
-  'fog': ' que haya bancos de niebla',
-  'rainy': 'n lluvias',
-  'partlycloudy': ' que haya nubes y claros',
-  'clearnight': ' una noche clara',
-  'sunny': ' un día soleado'
+  'cloudy': ' que esté el cielo nublado ☁',
+  'fog': ' que haya bancos de niebla 🌫',
+  'rainy': 'n lluvias 🌧',
+  'partlycloudy': ' que haya nubes y claros 🌥',
+  'clearnight': ' una noche clara 🌙',
+  'sunny': ' un día soleado ☀',
+  'lightning': 'n tormentas eléctricas 🌩'
 } -%}
-{{ prediccionesClima.get(clima, 'algo que no está claro') }}
+{{ prediccionesClima.get(clima, ' algo que no está claro') }}
 {%- endmacro -%}
 
 {# Convierte la dirección del viento en grados al punto cardinal desde el que se origina el viento #}
 {%- macro traducirDireccionViento(direccion) -%}
 {%- set direccionesViento = {
   0: 'norte',
+  45: 'noreste',
   90: 'este',
+  135: 'sureste',
   180: 'sur',
-  270: 'oeste'
+  225: 'suroeste',
+  270: 'oeste',
+  315: 'noroeste'
 } -%}
 {{ direccionesViento.get(direccion, direccion) }}
 {%- endmacro -%}

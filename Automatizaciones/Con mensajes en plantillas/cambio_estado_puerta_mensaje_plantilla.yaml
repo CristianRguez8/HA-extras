@@ -5,7 +5,7 @@ blueprint:
     author: cristianrguez8
 
 alias: Cambio de estado de puerta
-description: Avisar de que ya una puerta cambió de estado
+description: Avisar de que una puerta cambió de estado
 triggers:
   - trigger: state
     entity_id:

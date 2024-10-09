@@ -1,0 +1,61 @@
+blueprint:
+  name: Validación horaria puertas
+  description: Validación horaria de que hay una o varias puertas abiertas dependiente de la alarma
+  domain: automation
+  author: Kurisu
+  input:
+      horaInicio:
+        name: Hora de inicio
+        description: Elije desde qué hora empezará a comprobarse.
+        selector:
+          time:
+      horaFin:
+        name: Hora de fin
+        description: Elije a qué hora dejará a comprobarse.
+        selector:
+          time:
+      alarmado:
+        name: Alarma activada
+        description: Escoge la entidad que permitirá activar y desactivar los avisos.
+        selector:
+          entity:
+            filter:
+              - domain: input_boolean
+      etiqueta:
+        name: Etiqueta
+        description: Elije la etiqueta que se aplicará a la notificación.
+        selector:
+          select:
+            options:
+             - 'Info'
+             - 'Alarmas'
+             - 'Verificacion'
+
+alias: Validación horaria puertas
+description: Validación horaria de que hay una o varias puertas abiertas dependiente de la alarma
+triggers:
+  - trigger: time_pattern
+    hours: "*"
+variables:
+  puertasAbiertas: "{{label_entities('sensor_puerta') | select('is_state', 'on') | list | map('state_attr', 'friendly_name') | list }}"
+  totalAbiertas: "{{puertasAbiertas | length }}"
+conditions:
+  - and:
+    - "{{ totalAbiertas > 0 }}"
+    - condition: state
+      entity_id: !input alarmado
+      state: "on"
+    - condition: time
+      before: !input horaFin
+      after: !input horaInicio
+actions:
+  - service: script.enviar_notificacion_con_etiqueta
+    data:
+      titulo: >
+            {%- import 'mensajes.jinja' as ms -%}
+            {{ ms.mensajes_val_puertas('titulo') }}
+      mensaje: >
+            {%- import 'mensajes.jinja' as ms -%}
+            {{ ms.mensajes_val_puertas('mensaje', puertasAbiertas, totalAbiertas) }}
+      etiqueta: !input etiqueta
+mode: single

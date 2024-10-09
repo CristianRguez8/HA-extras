@@ -1,0 +1,53 @@
+blueprint:
+    name: Se ha detectado movimiento
+    description: Avisar de que se acaba de detectar movimiento
+    domain: automation
+    author: Kurisu
+    input:
+      sensores:
+        name: Sensores de movimiento
+        description: Selecciona los sensores de movimiento que se monitorizarán.
+        selector:
+          entity:
+            multiple: true
+            filter:
+               domain: binary_sensor
+               device_class: motion
+      alarmado:
+        name: Alarma activada
+        description: Escoge la entidad que permitirá activar y desactivar los avisos.
+        selector:
+          entity:
+            filter:
+              - domain: input_boolean
+      etiqueta:
+        name: Etiqueta
+        description: Elije la etiqueta que se aplicará a la notificación.
+        selector:
+          select:
+            options:
+             - 'Info'
+             - 'Alarmas'
+             - 'Verificacion'
+
+alias: Se ha detectado movimiento
+description: ""
+triggers:
+  - trigger: state
+    entity_id: !input sensores
+    not_to: 'off'
+conditions:
+  - condition: state
+    entity_id: !input alarmado
+    state: "on"
+actions:
+    - service: script.enviar_notificacion_con_etiqueta
+      data:
+        titulo: >
+            {%- import 'mensajes.jinja' as ms -%}
+            {{ ms.mensajes_movimiento('titulo', trigger.to_state.state, trigger.to_state.name) }}
+        mensaje: >
+            {%- import 'mensajes.jinja' as ms -%}
+            {{ ms.mensajes_movimiento('mensaje', trigger.to_state.state, trigger.to_state.name) }}
+        etiqueta: !input etiqueta
+mode: single

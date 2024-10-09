@@ -1,0 +1,53 @@
+blueprint:
+    name: Cambio de estado de puerta
+    description: Avisar de que una puerta cambió de estado
+    domain: automation
+    author: Kurisu
+    input:
+      sensores:
+        name: Puertas
+        description: Selecciona las puertas que se monitorizarán.
+        selector:
+          entity:
+            multiple: true
+            filter:
+               domain: binary_sensor
+               device_class: door
+      alarmado:
+        name: Alarma activada
+        description: Escoge la entidad que permitirá activar y desactivar los avisos.
+        selector:
+          entity:
+            filter:
+              - domain: input_boolean
+      etiqueta:
+        name: Etiqueta
+        description: Elije la etiqueta que se aplicará a la notificación.
+        selector:
+          select:
+            options:
+             - 'Info'
+             - 'Alarmas'
+             - 'Verificacion'
+             
+alias: Cambio de estado de puerta
+description: Avisar de que una puerta cambió de estado
+triggers:
+  - trigger: state
+    entity_id: !input sensores
+    to:
+conditions:
+  - condition: state
+    entity_id: !input alarmado
+    state: "on"
+actions:
+    - service: script.enviar_notificacion_con_etiqueta
+      data:
+        titulo: >
+            {%- import 'mensajes.jinja' as ms -%}
+            {{ ms.mensajes_puertas('titulo', trigger.to_state.state, trigger.to_state.name) }}
+        mensaje: >
+            {%- import 'mensajes.jinja' as ms -%}
+            {{ ms.mensajes_puertas('mensaje', trigger.to_state.state, trigger.to_state.name) }}
+        etiqueta: !input etiqueta
+mode: single

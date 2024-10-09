@@ -1,0 +1,42 @@
+blueprint:
+    name: Puerta abierta por la noche
+    description: Comprobar que no te dejas una puerta abierta por la noche
+    domain: automation
+    author: Kurisu
+    input:
+      hora:
+        name: Hora
+        description: Elije a qué hora se hará la comprobación.
+        selector:
+          time:
+      etiqueta:
+        name: Etiqueta
+        description: Elije la etiqueta que se aplicará a la notificación.
+        selector:
+          select:
+            options:
+             - 'Info'
+             - 'Alarmas'
+             - 'Verificacion'
+
+alias: Puerta abierta por la noche
+description: Comprobar que no te dejas una puerta abierta por la noche
+triggers:
+  - trigger: time
+    at: !input hora
+variables:
+    puertasAbiertas: "{{label_entities('sensor_puerta') | select('is_state', 'on') | list | map('state_attr', 'friendly_name') | list }}"
+    totalAbiertas: "{{puertasAbiertas | length }}"
+conditions: "{{ totalAbiertas > 0 }}"
+actions:
+    - service: script.enviar_notificacion_con_etiqueta
+      data:
+        titulo: >
+            {%- import 'mensajes.jinja' as ms -%}
+            {{ ms.mensajes_puertas_noche('titulo') }}
+        mensaje: >
+            {%- import 'mensajes.jinja' as ms -%}
+            {{ ms.mensajes_puertas_noche('mensaje', puertasAbiertas, totalAbiertas) }}
+        etiqueta: !input etiqueta
+mode: single
+
